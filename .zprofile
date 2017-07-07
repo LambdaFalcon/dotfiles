@@ -1,6 +1,6 @@
 #  -----------------------------------------------------------------------------
 #
-#  .BASH_PROFILE of falcon
+#  .ZPROFILE of falcon (for zsh)
 #
 #  Parts:
 #  1.  Environment configuration
@@ -18,8 +18,7 @@
 
 #   Change prompt
 #   -------------------------------------------
-    export PS1="[\d \t] \u @\h : \w\n>$ "
-    export PS2=">$ "
+#   Just don't, pure prompt is already amazing (in .zshrc)
 
 #   Load nvm
 #   -------------------------------------------
@@ -30,6 +29,10 @@
 #   -------------------------------------------
     export PATH="/Library/Frameworks/Python.framework/Versions/3.5/bin:${PATH}"
 
+#   Google Drive Location
+#   -------------------------------------------
+    export GDRIVE_HOME='/Users/aron/Google Drive'
+
 
 
 #   ---------------------------------------
@@ -38,11 +41,62 @@
 
     export CLICOLOR=1
     export LSCOLORS=GxFxCxDxBxegedabagaced
-    eval "$(thefuck --alias)"           # Create "fuck" alias for thefuck
-    alias ll="ls -lahAFGp"              # Better ls
-    cd() { builtin cd "$@"; ll; }       # Always list directory contents upon 'cd'
-    alias cd..='cd ../'                 # Go back 1 directory level (for fast typers)
-    alias c='clear'                     # Clear terminal display
+    eval "$(thefuck --alias)"                   # Create "fuck" alias for thefuck
+    alias ll="ls -lahAFGp"                      # Better ls
+    alias l='ll'                                # Short ll because I mistyped too many times
+    cd() { builtin cd "$@"; ll; }               # Always list directory contents upon 'cd'
+    alias cd..='cd ../'                         # Go back 1 directory level (for fast typers)
+    alias gd="cd '${GDRIVE_HOME}'"              # Go to google drive folder
+    alias c='clear'                             # Clear terminal display
+    alias mk='make'                             # Make short
+    alias am='atom'                             # Atom short
+    alias subl='open -a Sublime\ Text'	        # Sublime short
+    alias prof='open ~/.zprofile'               # Open this file
+
+#   fastex: to open a template Latex document in the current folder
+#   -------------------------------------------
+    fastex () {
+      # Get template file
+      cp ${GDRIVE_HOME}/TEMPLATES/template.tex .
+
+      # Get filename and rename
+      if [ "$#" -eq 1 ] ; then
+        filename="$1"
+      else
+        echo -n "Enter a name for the file: "
+        read filename
+      fi
+      mv template.tex ${filename}.tex
+
+      # Change import of falcon extensions from https://stackoverflow.com/questions/11245144/replace-whole-line-containing-a-string-using-sed
+      falconpath="${GDRIVE_HOME}/TEMPLATES/"
+      sed -i'.savefile' -- "s~FALCON_PATH~$falconpath~" "${filename}.tex"
+
+      # Compile latex and open file
+      pdflatex ${filename} >/dev/null   # only print errors
+      open -a TexShop ${filename}.tex
+
+      # Remove save file after sed
+      if [ -f "${filename}.tex.savefile" ] ; then
+        rm "${filename}.tex.savefile"
+      fi
+    }
+
+#   falcon: open tex commands extension file
+#   -------------------------------------------
+    alias falcon="open -a TexShop '${GDRIVE_HOME}/TEMPLATES/falcon.tex'"
+
+#   fastc: to open a template C code file in the current folder
+#   -------------------------------------------
+    # fastc () {
+    #   echo fastc ;
+    # }
+
+#   fastcc: to open a template C++ code file in the current folder
+#   -------------------------------------------
+    # fastcc () {
+    #   echo fastcc ;
+    # }
 
 
 
@@ -52,11 +106,7 @@
 
 #   USI folder
 #   -------------------------------------------
-    alias usi="cd ~/Google\ Drive/SCHOOL/USI/B4 && ll"
-
-#   pintOS command
-#   -------------------------------------------
-    alias pintOS='cd ~/pintOS/pintos0/ && vagrant up && vagrant ssh'
+    alias usi="cd '${GDRIVE_HOME}/SCHOOL/USI/UROP2017'"
 
 
 
@@ -108,6 +158,8 @@
 #   -----------------
 
     alias ip="ifconfig en0 | grep -E 'status|inet|inet6' | sort -br"
+    alias vpnusi="scutil --nc start USI_inf_VPN"
+    alias npvusi="scutil --nc stop USI_inf_VPN && echo 'disconnected'"
 
 #   ii:  display useful host related informaton
 #   -------------------------------------------------------------------
