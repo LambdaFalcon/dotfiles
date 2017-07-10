@@ -53,9 +53,9 @@
     alias subl='open -a Sublime\ Text'	        # Sublime short
     alias prof='open ~/.zprofile'               # Open this file
 
-#   fastex: to open a template Latex document in the current folder
+#   fasttex: to open a template Latex document in the current folder
 #   -------------------------------------------
-    fastex () {
+    fasttex () {
       # Get template file
       cp ${GDRIVE_HOME}/TEMPLATES/template.tex .
 
@@ -82,6 +82,33 @@
       fi
     }
 
+#   readme: to open a template README document in the current folder
+#   -------------------------------------------
+    readme () {
+      # Get template file
+      cp ${GDRIVE_HOME}/TEMPLATES/README.txt .
+
+      # Get filename and rename
+      if [ "$#" -eq 1 ] ; then
+        filename="$1"
+      else
+        echo -n "Enter a name for the file: "
+        read filename
+        echo -n "Use txt (1) or md (2)? "
+        read ext
+        if [ "$ext" -eq 1 ] ; then
+          mv README.txt ${filename}.txt
+          file=${filename}.txt
+        elif [ "$ext" -eq 2 ] ; then
+          mv README.txt ${filename}.md
+          file=${filename}.md
+        fi
+      fi
+
+      # open with atom
+      am ${file}
+    }
+
 #   falcon: open tex commands extension file
 #   -------------------------------------------
     alias falcon="open -a TexShop '${GDRIVE_HOME}/TEMPLATES/falcon.tex'"
@@ -106,7 +133,7 @@
 
 #   USI folder
 #   -------------------------------------------
-    alias usi="cd '${GDRIVE_HOME}/SCHOOL/USI/UROP2017'"
+    alias usi="cd ~/UROP2017/"
 
 
 
