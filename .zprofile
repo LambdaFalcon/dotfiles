@@ -135,6 +135,31 @@
 #   -------------------------------------------
     alias usi="cd ~/UROP2017/"
 
+#   mkcgal: compile an own program in CGAL
+#   -------------------------------------------
+    mkcgal () {
+      if [ "$#" -ne 1 ] ; then
+        echo -n "What do you want to compile? "
+        read executable
+      else
+        executable=$1
+      fi
+
+      echo "Generating CMakeLists ..." &&
+      cgal_create_CMakeLists -s ${executable} > /dev/null &&
+      echo "Generating Makefile ..." &&
+      cmake -DCGAL_DIR=$HOME/CGAL-4.9.1 . > /dev/null &&
+      echo "Compiling ${executable} ..." &&
+      make > /dev/null &&
+      echo "${executable} ready"
+    }
+    alias makecgal="mkcgal"
+
+    cleancgal () {
+      rm cmake_install.cmake CMakeCache.txt CMakeLists.txt Makefile &&
+      rm -rf CMakeFiles/ &&
+      echo "The trash has been taken care of"
+    }
 
 
 #   ---------------------------------
