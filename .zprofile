@@ -33,6 +33,21 @@
 #   -------------------------------------------
     export GDRIVE_HOME='/Users/aron/Google Drive'
 
+#   Ipe ipelets directory
+#   -------------------------------------------
+    export IPELETS='/Applications/Ipe.app/Contents/Resources/ipelets'
+
+#   Java + Lucene jars
+#   -------------------------------------------
+    export JAVA_HOME="$(/usr/libexec/java_home -v 1.x)"
+
+#   Scala Build Tool
+#   -------------------------------------------
+    export PATH="/usr/local/opt/sbt@0.13/bin:$PATH"
+
+#   Android Platform Tools
+#   -------------------------------------------
+    export PATH="$HOME/.platform-tools:$PATH"
 
 
 #   ---------------------------------------
@@ -41,17 +56,17 @@
 
     export CLICOLOR=1
     export LSCOLORS=GxFxCxDxBxegedabagaced
-    eval "$(thefuck --alias)"                   # Create "fuck" alias for thefuck
-    alias ll="ls -lahAFGp"                      # Better ls
-    alias l='ll'                                # Short ll because I mistyped too many times
-    cd() { builtin cd "$@"; ll; }               # Always list directory contents upon 'cd'
-    alias cd..='cd ../'                         # Go back 1 directory level (for fast typers)
-    alias gd="cd '${GDRIVE_HOME}'"              # Go to google drive folder
-    alias c='clear'                             # Clear terminal display
-    alias mk='make'                             # Make short
-    alias am='atom'                             # Atom short
-    alias subl='open -a Sublime\ Text'	        # Sublime short
-    alias prof='open ~/.zprofile'               # Open this file
+    eval "$(thefuck --alias)"                         # Create "fuck" alias for thefuck
+    alias ll="ls -lahAFGp"                            # Better ls
+    alias l='ll'                                      # Short ll because I mistyped too many times
+    cd() { builtin cd "$@"; ll; }                     # Always list directory contents upon 'cd'
+    alias cd..='cd ../'                               # Go back 1 directory level (for fast typers)
+    alias gd="cd '${GDRIVE_HOME}'"                    # Go to google drive folder
+    alias c='clear'                                   # Clear terminal display
+    alias am='atom'                                   # Atom short
+    alias subl='open -a Sublime\ Text'                # Sublime short
+    alias profile='am ~/.zprofile'                  # Open this file
+    alias templates="am '${GDRIVE_HOME}/TEMPLATES'"   # Open templates folder
 
 #   fasttex: to open a template Latex document in the current folder
 #   -------------------------------------------
@@ -125,6 +140,20 @@
     #   echo fastcc ;
     # }
 
+#   loc: count lines of code in a directory
+#   -------------------------------------------
+    loc () {
+      # get argument
+      if [ "$#" -eq 2 ] ; then
+        dir="$1"
+        name="$2"
+      else
+        echo "Usage: loc <dir> <name> (both can be patterns)"
+        return 1;
+      fi
+
+      find $dir -type f -name $name | xargs cat | sed '/^\s*#/d;/^\s*$/d;/^\s*\/\//d' | wc -l
+    }
 
 
 #   -------------------------
@@ -133,24 +162,39 @@
 
 #   USI folder
 #   -------------------------------------------
-    alias usi="cd ~/UROP2017/"
+    alias usi="cd '${GDRIVE_HOME}/SCHOOL/USI/B6'"
 
-#   mkcgal: compile an own program in CGAL
+    bsc() {
+      echo -n "(b)ackend or (f)rontend? "
+      read location
+      case $location in
+        "f")  location="frontend"   ;;
+        "b")  location="backend" ;;
+        *)    echo "wrong input"; return -1 ;;
+      esac
+      cd ~/GIT/module-event-scheduler-${location}
+    }
+
+#   mkcgal, mkallcgal and cleancgal: compile an own program in CGAL; clean files
 #   -------------------------------------------
     mkcgal () {
       if [ "$#" -ne 1 ] ; then
-        echo -n "What do you want to compile? "
+        echo -n "If you want to compile a single executable enter a name, otherwise press enter: "
         read executable
       else
         executable=$1
       fi
 
-      echo "Generating CMakeLists ..." &&
-      cgal_create_CMakeLists -s ${executable} > /dev/null &&
-      echo "Generating Makefile ..." &&
-      cmake -DCGAL_DIR=$HOME/CGAL-4.9.1 . > /dev/null &&
-      echo "Compiling ${executable} ..." &&
-      make > /dev/null &&
+      echo "Generating CMakeLists ..."
+      if [ "${executable}" -ne "" ] ; then
+        cgal_create_CMakeLists -s ${executable} > /dev/null
+      else
+        cgal_create_CMakeLists > /dev/null
+      fi
+      echo "Generating Makefile ..."
+      cmake -DCGAL_DIR=$HOME/CGAL-4.9.1 . > /dev/null
+      echo "Compiling ${executable} ..."
+      make > /dev/null
       echo "${executable} ready"
     }
     alias makecgal="mkcgal"
@@ -161,6 +205,21 @@
       echo "The trash has been taken care of"
     }
 
+#   cmakeipe: cmake for an Ipelet
+#   -------------------------------------------
+    alias cmakeipe="cmake -DIPE_LIBRARIES=/Applications/Ipe.app/Contents/Frameworks/libipe.dylib -DIPE_INCLUDE_DIR=/Applications/Ipe.app/Contents/Frameworks/Headers/"
+
+#   ipebis: make the bisectors ipelet, copy lib file, kill Ipe and reopen it
+#   -------------------------------------------
+    ipebis () {
+      make &&
+      cp libCGAL_bisectors.so ${IPELETS}/libCGAL_bisectors.dylib &&
+      cp lua/libCGAL_bisectors.lua ${IPELETS}/libCGAL_bisectors.lua &&
+      ll &&
+      pkill ipe ||
+      sleep 1 &&
+      /Applications/Ipe.app/Contents/MacOS/ipe # open ipe but also terminal
+    }
 
 #   ---------------------------------
 #   | 4. FILE AND FOLDER MANAGEMENT |
@@ -223,6 +282,6 @@
         echo -e "\n${RED}Machine stats :$NC " ; uptime
         echo -e "\n${RED}Current network location :$NC " ; scselect
         echo -e "\n${RED}Public facing IP Address :$NC " ;ip
-        #echo -e "\n${RED}DNS Configuration:$NC " ; scutil --dns
+        echo -e "\n${RED}DNS Configuration:$NC " ; scutil --dns
         echo
     }
