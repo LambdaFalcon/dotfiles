@@ -5,6 +5,7 @@ SAVEHIST=1000
 setopt beep
 bindkey -e
 # End of lines configured by zsh-newuser-install
+
 # The following lines were added by compinstall
 zstyle :compinstall filename '/Users/aron/.zshrc'
 
@@ -21,3 +22,8 @@ prompt pure
 # Setup for syntax highlighting
 source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 # End of syntax highlighting setup
+
+# Setup paths and variables
+export PATH="/usr/local/opt/qt/bin:$PATH"
+MANPATH="/usr/local/opt/coreutils/libexec/gnuman:$MANPATH"
+# End of paths and variables setup
