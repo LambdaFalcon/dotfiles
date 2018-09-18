@@ -16,14 +16,13 @@
 #   | 1. ENVIRONMENT CONFIGURATION |
 #   --------------------------------
 
+#   .zshrc
+#   -------------------------------------------
+	source ~/.zshrc
+
 #   Change prompt
 #   -------------------------------------------
 #   Just don't, pure prompt is already amazing (in .zshrc)
-
-#   Load nvm
-#   -------------------------------------------
-    export NVM_DIR="/Users/aron/.nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
 
 #   Python 3.5 PATH
 #   -------------------------------------------
@@ -31,15 +30,11 @@
 
 #   Google Drive Location
 #   -------------------------------------------
-    export GDRIVE_HOME='/Users/aron/Google Drive'
-
-#   Ipe ipelets directory
-#   -------------------------------------------
-    export IPELETS='/Applications/Ipe.app/Contents/Resources/ipelets'
+    export GDRIVE_HOME="/Users/${USER}/Google Drive"
 
 #   Java + Lucene jars
 #   -------------------------------------------
-    export JAVA_HOME="$(/usr/libexec/java_home -v 1.x)"
+    export JAVA_HOME="$(/usr/libexec/java_home -v 10.x)"
 
 #   Scala Build Tool
 #   -------------------------------------------
@@ -61,12 +56,15 @@
     alias l='ll'                                      # Short ll because I mistyped too many times
     cd() { builtin cd "$@"; ll; }                     # Always list directory contents upon 'cd'
     alias cd..='cd ../'                               # Go back 1 directory level (for fast typers)
-    alias gd="cd '${GDRIVE_HOME}'"                    # Go to google drive folder
+    alias drive="cd '${GDRIVE_HOME}'"                 # Go to google drive folder
     alias c='clear'                                   # Clear terminal display
-    alias am='atom'                                   # Atom short
     alias subl='open -a Sublime\ Text'                # Sublime short
-    alias profile='am ~/.zprofile'                  # Open this file
-    alias templates="am '${GDRIVE_HOME}/TEMPLATES'"   # Open templates folder
+    alias profile='subl ~/.zprofile'                  # Open this file
+    alias templates="subl '${GDRIVE_HOME}/TEMPLATES'" # Open templates folder
+
+#   port: to check which process is using a port
+#   -------------------------------------------
+    port() { lsof -n -i :$1 }
 
 #   fasttex: to open a template Latex document in the current folder
 #   -------------------------------------------
@@ -120,8 +118,8 @@
         fi
       fi
 
-      # open with atom
-      am ${file}
+      # open with sublime
+      subl ${file}
     }
 
 #   falcon: open tex commands extension file
@@ -143,7 +141,7 @@
 #   loc: count lines of code in a directory
 #   -------------------------------------------
     loc () {
-      # get argument
+      # get arguments
       if [ "$#" -eq 2 ] ; then
         dir="$1"
         name="$2"
@@ -155,6 +153,20 @@
       find $dir -type f -name $name | xargs cat | sed '/^\s*#/d;/^\s*$/d;/^\s*\/\//d' | wc -l
     }
 
+#   loc: count lines of code in a directory
+#   -------------------------------------------
+	gitloc () {
+		# get argument
+    	if [ "$#" -eq 1 ] ; then
+        	author="$1"
+      	else
+        	echo "Usage: gitloc <author>"
+        	return 1;
+      	fi
+
+		git log --author="${author}" --pretty=tformat: --numstat | awk '{ add += $1; subs += $2; loc += $1 - $2 } END { printf "added lines: %s, removed lines: %s, total lines: %s\n", add, subs, loc }' -
+	}
+
 
 #   -------------------------
 #   | 3. TEMPORARY COMMANDS |
@@ -162,64 +174,15 @@
 
 #   USI folder
 #   -------------------------------------------
-    alias usi="cd '${GDRIVE_HOME}/SCHOOL/USI/B6'"
+    alias usi="cd '${GDRIVE_HOME}/SCHOOL/USI/M1'"
 
-    bsc() {
-      echo -n "(b)ackend or (f)rontend? "
-      read location
-      case $location in
-        "f")  location="frontend"   ;;
-        "b")  location="backend" ;;
-        *)    echo "wrong input"; return -1 ;;
-      esac
-      cd ~/GIT/module-event-scheduler-${location}
-    }
-
-#   mkcgal, mkallcgal and cleancgal: compile an own program in CGAL; clean files
+#   HEGIAS folder
 #   -------------------------------------------
-    mkcgal () {
-      if [ "$#" -ne 1 ] ; then
-        echo -n "If you want to compile a single executable enter a name, otherwise press enter: "
-        read executable
-      else
-        executable=$1
-      fi
+    alias heg="cd ~/GIT/hegiasGo"
 
-      echo "Generating CMakeLists ..."
-      if [ "${executable}" -ne "" ] ; then
-        cgal_create_CMakeLists -s ${executable} > /dev/null
-      else
-        cgal_create_CMakeLists > /dev/null
-      fi
-      echo "Generating Makefile ..."
-      cmake -DCGAL_DIR=$HOME/CGAL-4.9.1 . > /dev/null
-      echo "Compiling ${executable} ..."
-      make > /dev/null
-      echo "${executable} ready"
-    }
-    alias makecgal="mkcgal"
-
-    cleancgal () {
-      rm cmake_install.cmake CMakeCache.txt CMakeLists.txt Makefile &&
-      rm -rf CMakeFiles/ &&
-      echo "The trash has been taken care of"
-    }
-
-#   cmakeipe: cmake for an Ipelet
+#   HEGIAS apps
 #   -------------------------------------------
-    alias cmakeipe="cmake -DIPE_LIBRARIES=/Applications/Ipe.app/Contents/Frameworks/libipe.dylib -DIPE_INCLUDE_DIR=/Applications/Ipe.app/Contents/Frameworks/Headers/"
-
-#   ipebis: make the bisectors ipelet, copy lib file, kill Ipe and reopen it
-#   -------------------------------------------
-    ipebis () {
-      make &&
-      cp libCGAL_bisectors.so ${IPELETS}/libCGAL_bisectors.dylib &&
-      cp lua/libCGAL_bisectors.lua ${IPELETS}/libCGAL_bisectors.lua &&
-      ll &&
-      pkill ipe ||
-      sleep 1 &&
-      /Applications/Ipe.app/Contents/MacOS/ipe # open ipe but also terminal
-    }
+    alias ias="open -a visual\ Studio\ Code && open -a postman && open -a gitKraken && open -a studio\ 3T && open -a Google\ Chrome\ Canary && open -a mongoDB\ Compass\ Community.app"
 
 #   ---------------------------------
 #   | 4. FILE AND FOLDER MANAGEMENT |
