@@ -16,10 +16,6 @@
 #   | 1. ENVIRONMENT CONFIGURATION |
 #   --------------------------------
 
-#   .zshrc
-#   -------------------------------------------
-	source ~/.zshrc
-
 #   Change prompt
 #   -------------------------------------------
 #   Just don't, pure prompt is already amazing (in .zshrc)
@@ -32,17 +28,17 @@
 #   -------------------------------------------
     export GDRIVE_HOME="/Users/${USER}/Google Drive"
 
-#   Java + Lucene jars
+#   Java home
 #   -------------------------------------------
-    export JAVA_HOME="$(/usr/libexec/java_home -v 10.x)"
+    export JAVA_HOME="$(/usr/libexec/java_home)"
 
 #   Scala Build Tool
 #   -------------------------------------------
     export PATH="/usr/local/opt/sbt@0.13/bin:$PATH"
 
-#   Android Platform Tools
+#   Rust build tool
 #   -------------------------------------------
-    export PATH="$HOME/.platform-tools:$PATH"
+    export PATH="$HOME/.cargo/bin:$PATH"
 
 
 #   ---------------------------------------
@@ -51,16 +47,13 @@
 
     export CLICOLOR=1
     export LSCOLORS=GxFxCxDxBxegedabagaced
-    eval "$(thefuck --alias)"                         # Create "fuck" alias for thefuck
-    alias ll="ls -lahAFGp"                            # Better ls
-    alias l='ll'                                      # Short ll because I mistyped too many times
-    cd() { builtin cd "$@"; ll; }                     # Always list directory contents upon 'cd'
+    alias l="ls -lahAFGp"                            # Better ls
+    cd() { builtin cd "$@"; l; }                      # Always list directory contents upon 'cd'
     alias cd..='cd ../'                               # Go back 1 directory level (for fast typers)
     alias drive="cd '${GDRIVE_HOME}'"                 # Go to google drive folder
     alias c='clear'                                   # Clear terminal display
-    alias subl='open -a Sublime\ Text'                # Sublime short
-    alias profile='subl ~/.zprofile'                  # Open this file
-    alias templates="subl '${GDRIVE_HOME}/TEMPLATES'" # Open templates folder
+    alias profile='code ~/.zprofile'                  # Open this file
+    alias templates="code '${GDRIVE_HOME}/TEMPLATES'" # Open templates folder
 
 #   port: to check which process is using a port
 #   -------------------------------------------
@@ -95,6 +88,24 @@
       fi
     }
 
+    letter () {
+      # Get template file
+      cp ${GDRIVE_HOME}/TEMPLATES/letter.tex .
+
+      # Get filename and rename
+      if [ "$#" -eq 1 ] ; then
+        filename="$1"
+      else
+        echo -n "Enter a name for the file: "
+        read filename
+      fi
+      mv letter.tex ${filename}.tex
+
+      # Compile latex and open file
+      pdflatex ${filename} >/dev/null   # only print errors
+      open -a TexShop ${filename}.tex
+    }
+
 #   readme: to open a template README document in the current folder
 #   -------------------------------------------
     readme () {
@@ -118,25 +129,13 @@
         fi
       fi
 
-      # open with sublime
-      subl ${file}
+      # open with visual studio code
+      code ${file}
     }
 
 #   falcon: open tex commands extension file
 #   -------------------------------------------
     alias falcon="open -a TexShop '${GDRIVE_HOME}/TEMPLATES/falcon.tex'"
-
-#   fastc: to open a template C code file in the current folder
-#   -------------------------------------------
-    # fastc () {
-    #   echo fastc ;
-    # }
-
-#   fastcc: to open a template C++ code file in the current folder
-#   -------------------------------------------
-    # fastcc () {
-    #   echo fastcc ;
-    # }
 
 #   loc: count lines of code in a directory
 #   -------------------------------------------
@@ -155,17 +154,46 @@
 
 #   loc: count lines of code in a directory
 #   -------------------------------------------
-	gitloc () {
-		# get argument
-    	if [ "$#" -eq 1 ] ; then
-        	author="$1"
-      	else
-        	echo "Usage: gitloc <author>"
-        	return 1;
-      	fi
+    gitloc () {
+      # get argument
+      if [ "$#" -eq 1 ] ; then
+        author="$1"
+      else
+        echo "Usage: gitloc <author>"
+        return 1;
+      fi
 
-		git log --author="${author}" --pretty=tformat: --numstat | awk '{ add += $1; subs += $2; loc += $1 - $2 } END { printf "added lines: %s, removed lines: %s, total lines: %s\n", add, subs, loc }' -
-	}
+      git log --author="${author}" --pretty=tformat: --numstat | awk '{ add += $1; subs += $2; loc += $1 - $2 } END { printf "added lines: %s, removed lines: %s, total lines: %s\n", add, subs, loc }' -
+    }
+
+#   md2pdf: script to convert a MD file to PDF with Pandoc
+#   -------------------------------------------
+    md2pdf () {
+      echo "NOT YET IMPLEMENTED"
+      return 1;
+      OUTPUT_NAME=hegias_dev_guide.pdf
+      MARGIN=2cm
+
+      # get arguments
+      if [ "$#" -eq 2 ] ; then
+          input="$1"
+          output="$1"
+      else
+          echo "Usage: md2pdf <author>"
+          return 1;
+      fi
+
+      pandoc \
+        --toc \
+        --from markdown+smart \
+        --number-sections \
+        --top-level-division=chapter \
+        --variable documentclass=report \
+        --variable geometry:margin=$MARGIN \
+        --variable mainfont='Fira Sans' \
+        --pdf-engine=`which xelatex` \
+        -o $OUTPUT_NAME
+    }
 
 
 #   -------------------------
@@ -174,15 +202,26 @@
 
 #   USI folder
 #   -------------------------------------------
-    alias usi="cd '${GDRIVE_HOME}/SCHOOL/USI/M1'"
+    alias usi="cd '${GDRIVE_HOME}/SCHOOL/USI/M3'"
 
 #   HEGIAS folder
 #   -------------------------------------------
     alias heg="cd ~/GIT/hegiasGo"
 
-#   HEGIAS apps
+#   kibana
 #   -------------------------------------------
-    alias ias="open -a visual\ Studio\ Code && open -a postman && open -a gitKraken && open -a studio\ 3T && open -a Google\ Chrome\ Canary && open -a mongoDB\ Compass\ Community.app"
+    kib () {
+        # get optional arg
+        if [ "$#" -eq 1 ] ; then
+            ~/elastic/kibana-7.0.0-darwin-x86_64/bin/kibana -e $1
+        else
+            ~/elastic/kibana-7.0.0-darwin-x86_64/bin/kibana
+        fi
+    }
+
+#   elastic
+#   -------------------------------------------
+    alias elastic="cd ~/elastic && ./elasticsearch-7.0.0/bin/elasticsearch -d"
 
 #   ---------------------------------
 #   | 4. FILE AND FOLDER MANAGEMENT |
